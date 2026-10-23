@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'self'" />
+<title>OpenHElity</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon-192.png" />
+<meta name="theme-color" content="#0d0f13" />
+<meta name="mobile-web-app-capable" content="yes" />
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-mark" data-i18n="app.title">OpenHElity</span>
+    <span class="brand-sub" data-i18n="app.subtitle"></span>
+  </div>
+
+  <div class="context">
+    <label><span data-i18n="toolbar.profile"></span>
+      <select id="profile"></select>
+    </label>
+    <label><span data-i18n="toolbar.layer"></span>
+      <select id="layer"></select>
+    </label>
+  </div>
+
+  <nav id="nav" class="nav" role="tablist">
+    <button class="nav-item is-active" data-panel="panel-remap" data-board="1" data-select="1" role="tab" data-i18n="tab.remap"></button>
+    <button class="nav-item" data-panel="panel-actuation" data-board="1" data-select="1" data-actuation="1" role="tab" data-i18n="tab.actuation"></button>
+    <button class="nav-item" data-panel="panel-rt" data-board="1" data-select="1" data-rt="1" role="tab" data-i18n="tab.rt"></button>
+    <button class="nav-item" data-panel="panel-advanced" data-board="1" data-select="1" data-slot="1" role="tab" data-i18n="tab.advanced"></button>
+    <button class="nav-item" data-panel="panel-light" data-board="1" data-select="1" data-colors="1" role="tab" data-i18n="tab.lighting"></button>
+    <button class="nav-item" data-panel="panel-macros" data-board="1" data-macros="1" role="tab" data-i18n="tab.macros"></button>
+    <button class="nav-item" data-panel="panel-shortcuts" role="tab" data-i18n="tab.shortcuts"></button>
+    <button class="nav-item" data-panel="panel-settings" role="tab" data-i18n="tab.settings"></button>
+    <button class="nav-item" data-panel="panel-log" role="tab" data-i18n="tab.log"></button>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="device-card">
+      <span class="device-dot" id="device-dot"></span>
+      <span id="device-name" class="device"></span>
+    </div>
+    <select id="locale" aria-label="Language"></select>
+    <button id="connect" class="primary" data-i18n="app.connect"></button>
+    <button id="disconnect" hidden data-i18n="app.disconnect"></button>
+  </div>
+</aside>
+
+<div class="main-area">
+  <nav class="toolbar">
+    <label class="auto-write" id="auto-write-row" hidden>
+      <input id="auto-write" type="checkbox" />
+      <span data-i18n="toolbar.autoWrite"></span>
+    </label>
+    <div class="toolbar-status">
+      <span id="toolbar-message" class="toolbar-message" role="status" hidden></span>
+      <span id="save-status" class="save-status" hidden></span>
+      <span id="busy" class="busy" hidden></span>
+    </div>
+    <div id="toolbar-actions" class="toolbar-actions" hidden>
+    <button id="reload" data-i18n="toolbar.reload"></button>
+    <button id="import" data-i18n="toolbar.import"></button>
+    <input id="import-file" type="file" accept="application/json,.json" hidden />
+    <button id="export" data-i18n="toolbar.export"></button>
+    <button id="copy" data-i18n="toolbar.copy"></button>
+    <button id="restore" disabled data-i18n="toolbar.restore"></button>
+    <button id="write" class="primary" disabled data-i18n="toolbar.write"></button>
+    </div>
+  </nav>
+  <div class="main-scroll">
+<main id="workspace" hidden>
+
+  <section class="board-wrap">
+    <div class="board-row">
+      <div id="board" class="board" role="group" aria-label="HE30 keyboard"></div>
+      <section id="key-tester" class="key-tester" aria-live="polite">
+        <header>
+          <strong data-i18n="tester.title"></strong>
+          <small id="tester-status"></small>
+        </header>
+        <div class="tester-held"><small data-i18n="tester.held"></small> <span id="tester-held"></span></div>
+        <ol id="tester-log" class="tester-log"></ol>
+      </section>
+    </div>
+    <div class="selection-bar">
+      <span id="selection-summary" class="muted"></span>
+      <button id="select-all" data-i18n="board.selectAll"></button>
+      <button id="select-none" data-i18n="board.clearSelection"></button>
+    </div>
+    <p id="board-hint" class="hint" data-i18n="board.hintSelect"></p>
+  </section>
+
+  <section id="panel-remap" class="panel is-active">
+    <div class="remap-head">
+      <input id="remap-search" class="search" type="search" />
+      <span id="remap-selection" class="muted"></span>
+    </div>
+    <div id="remap-catalogue"></div>
+  </section>
+
+  <section id="panel-light" class="panel">
+    <div class="cards">
+      <article class="card">
+        <h3 data-i18n="light.keys"></h3>
+        <p id="light-warning" class="warning" hidden></p>
+        <label><span data-i18n="light.effect"></span> <select id="light-effect"></select></label>
+        <label><span data-i18n="light.brightness"></span>
+          <input id="light-brightness" type="range" min="0" max="100" />
+          <input id="light-brightness-value" class="value-field" type="text" inputmode="decimal" /></label>
+        <label><span data-i18n="light.speed"></span>
+          <input id="light-speed" type="range" min="0" max="4" />
+          <input id="light-speed-value" class="value-field" type="text" inputmode="decimal" /></label>
+        <label><span data-i18n="light.color"></span> <input id="light-color" type="color" /></label>
+        <label class="check"><input id="light-multicolor" type="checkbox" />
+          <span data-i18n="light.multicolor"></span></label>
+        <p id="light-host" class="warning" data-i18n="light.hostDriven" hidden></p>
+        <button id="light-off" data-i18n="light.turnOff"></button>
+      </article>
+      <article class="card">
+        <h3 data-i18n="light.indicator"></h3>
+        <p class="hint" data-i18n="light.indicatorHint"></p>
+        <label><span data-i18n="light.effect"></span> <select id="indicator-effect"></select></label>
+        <label><span data-i18n="light.brightness"></span>
+          <input id="indicator-brightness" type="range" min="0" max="100" />
+          <input id="indicator-brightness-value" class="value-field" type="text" inputmode="decimal" /></label>
+        <button id="indicator-off" data-i18n="light.indicatorOff"></button>
+      </article>
+      <article class="card">
+        <h3 data-i18n="light.perKeyTitle"></h3>
+        <p id="perkey-warning" class="warning" hidden></p>
+        <p id="perkey-hint" class="hint" data-i18n="light.perKeyHint"></p>
+        <label id="key-color-row"><span data-i18n="light.keyColor"></span> <input id="key-color" type="color" /></label>
+      </article>
+    </div>
+  </section>
+
+  <section id="panel-actuation" class="panel">
+    <p class="hint" data-i18n="hall.hint"></p>
+
+    <div id="actuation-empty" class="card" data-i18n="hall.noKey"></div>
+    <div id="actuation-editor" class="cards" hidden>
+      <article class="card">
+        <h3 data-i18n="tab.actuation"></h3>
+<div class="actuation-visual">
+          <svg id="switch-art" class="switch-art" viewBox="0 0 250 140" aria-hidden="true">
+            <path class="housing" d="M65 50 H155 V53 L163 56 L176 85 H44 L57 56 L65 53 Z" />
+            <path class="detail" d="M50 81 H90 V77 H130 V81 H170" />
+            <rect class="housing" x="32" y="85" width="156" height="10" />
+            <rect class="housing" x="44" y="95" width="132" height="35" />
+            <g id="switch-moving">
+              <rect class="part" x="82.5" y="10" width="55" height="80" rx="2" />
+              <rect class="detail" x="92" y="14" width="8" height="32" />
+              <rect class="detail" x="120" y="14" width="8" height="32" />
+            </g>
+            <g class="actuation-dimension">
+              <line id="switch-marker" x1="137.5" y1="90" x2="214" y2="90" />
+              <line id="switch-arrow" x1="206" y1="90" x2="206" y2="130" />
+              <path id="switch-arrow-heads" d="" />
+            </g>
+            <g class="scale">
+              <line x1="176" y1="130" x2="214" y2="130" />
+              <line x1="176" y1="90" x2="214" y2="90" />
+              <line x1="204" y1="120" x2="208" y2="120" />
+              <line x1="204" y1="110" x2="208" y2="110" />
+              <line x1="204" y1="100" x2="208" y2="100" />
+              <text x="220" y="130">0</text>
+              <text x="220" y="90">4</text>
+            </g>
+          </svg>
+          <input id="travel-actuation" class="vertical" type="range" min="2" max="400" step="2" data-vertical="down" data-per-pixel="1.5" />
+        </div>
+        <label><span data-i18n="hall.actuation"></span>
+          <input id="travel-actuation-value" class="value-field" type="text" inputmode="decimal" data-unit="mm" /></label>
+        <p class="hint" data-i18n="hall.switchTypeNote"></p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="hall.key"></h3>
+        <dl id="hall-info"></dl>
+      </article>
+    </div>
+  </section>
+
+  <section id="panel-rt" class="panel">
+    <div id="rt-empty" class="card" data-i18n="hall.noKey"></div>
+    <div id="rt-editor" hidden>
+      <div class="rt-cards">
+        <article class="card">
+          <div class="card-head">
+            <h3 data-i18n="rt.enable"></h3>
+            <label class="switch"><input id="rt-enabled" type="checkbox" /><span></span></label>
+          </div>
+          <p class="muted" data-i18n="rt.enableText"></p>
+          <p id="rt-count" class="rt-count"></p>
+        </article>
+        <article id="rt-sensitivity-card" class="card">
+          <h3 data-i18n="rt.sensitivity"></h3>
+          <div class="card-row">
+            <span data-i18n="rt.split"></span>
+            <label class="switch"><input id="rt-split" type="checkbox" /><span></span></label>
+          </div>
+          <div id="rt-single">
+        <p class="rt-label" data-i18n="rt.sensitivityLabel"></p>
+        <div class="rt-slider">
+          <div class="rt-track">
+            <input id="travel-rt-both" type="range" min="2" max="200" step="2" />
+            <div class="rt-scale"><span data-i18n="rt.high"></span><span data-i18n="rt.low"></span></div>
+          </div>
+          <input id="travel-rt-both-value" class="value-field" type="text" inputmode="decimal" data-unit="mm" />
+        </div>
+          </div>
+          <div id="rt-split-fields" hidden>
+        <p class="rt-label" data-i18n="rt.pressLabel"></p>
+        <div class="rt-slider">
+          <div class="rt-track">
+            <input id="travel-rt-press" type="range" min="2" max="200" step="2" />
+            <div class="rt-scale"><span data-i18n="rt.high"></span><span data-i18n="rt.low"></span></div>
+          </div>
+          <input id="travel-rt-press-value" class="value-field" type="text" inputmode="decimal" data-unit="mm" />
+        </div>
+        <p class="rt-label" data-i18n="rt.releaseLabel"></p>
+        <div class="rt-slider">
+          <div class="rt-track">
+            <input id="travel-rt-release" type="range" min="2" max="200" step="2" />
+            <div class="rt-scale"><span data-i18n="rt.high"></span><span data-i18n="rt.low"></span></div>
+          </div>
+          <input id="travel-rt-release-value" class="value-field" type="text" inputmode="decimal" data-unit="mm" />
+        </div>
+          </div>
+        </article>
+        <article id="rt-continuous-card" class="card">
+          <div class="card-head">
+            <h3 data-i18n="rt.continuous"></h3>
+            <label class="switch"><input id="rt-continuous" type="checkbox" /><span></span></label>
+          </div>
+          <p class="muted" data-i18n="rt.continuousText"></p>
+          <p class="rt-info" data-i18n="rt.continuousInfo"></p>
+        </article>
+      </div>
+      <details class="rt-deadzones card">
+        <summary data-i18n="rt.deadzones"></summary>
+        <p class="muted" data-i18n="rt.deadzonesNote"></p>
+        <label><span data-i18n="hall.pressDeadzone"></span>
+          <input id="travel-press-deadzone" type="range" min="0" max="50" step="1" />
+          <input id="travel-press-deadzone-value" class="value-field" type="text" inputmode="decimal" data-unit="mm" /></label>
+        <label><span data-i18n="hall.releaseDeadzone"></span>
+          <input id="travel-release-deadzone" type="range" min="0" max="50" step="1" />
+          <input id="travel-release-deadzone-value" class="value-field" type="text" inputmode="decimal" data-unit="mm" /></label>
+      </details>
+    </div>
+  </section>
+
+  <section id="panel-settings" class="panel">
+    <p class="hint" data-i18n="settings.experimental"></p>
+    <div class="cards">
+      <article class="card">
+        <h3 data-i18n="settings.device"></h3>
+        <label><span data-i18n="settings.reportRate"></span> <select id="report-rate"></select></label>
+        <label><span data-i18n="settings.tickRate"></span> <select id="tick-rate"></select></label>
+        <label><span data-i18n="settings.debounce"></span>
+          <input id="debounce" type="number" min="0" max="7" /></label>
+      </article>
+      <article class="card">
+        <h3 data-i18n="settings.locks"></h3>
+        <label class="check"><input id="lock-win" type="checkbox" />
+          <span data-i18n="settings.lockWin"></span></label>
+        <label class="check"><input id="lock-alttab" type="checkbox" />
+          <span data-i18n="settings.lockAltTab"></span></label>
+        <label class="check"><input id="lock-altf4" type="checkbox" />
+          <span data-i18n="settings.lockAltF4"></span></label>
+        <label class="check"><input id="stability" type="checkbox" />
+          <span data-i18n="settings.stability"></span></label>
+      </article>
+      <article class="card">
+        <h3 data-i18n="settings.firmware"></h3>
+        <dl id="device-info"></dl>
+      </article>
+    </div>
+  </section>
+
+  <section id="panel-advanced" class="panel">
+    <div id="adv-bar" class="adv-bar card" hidden></div>
+    <div id="adv-sectors" class="adv-sectors">
+      <article id="adv-left" class="card"></article>
+      <article id="adv-right" class="card"></article>
+    </div>
+  </section>
+
+  <section id="panel-macros" class="panel">
+    <p class="hint" data-i18n="macros.hint"></p>
+    <div class="macro-layout">
+      <aside class="card">
+        <h3 data-i18n="macros.slots"></h3>
+        <ul id="macro-slots" class="slot-list"></ul>
+      </aside>
+      <article class="card macro-editor">
+        <div class="macro-head">
+          <h3 id="macro-title"></h3>
+        </div>
+        <div id="macro-keys" class="macro-keys"></div>
+        <div class="macro-toolbar">
+          <button id="macro-record" class="macro-record"></button>
+          <button id="macro-add-key" data-i18n="macros.addKey"></button>
+          <button id="macro-add-text" data-i18n="macros.addText"></button>
+          <button id="macro-add-mouse" data-i18n="macros.addMouse"></button>
+          <button id="macro-add-pause" data-i18n="macros.addPause"></button>
+          <span class="spacer"></span>
+          <button id="macro-clear" data-i18n="macros.clear"></button>
+        </div>
+        <div id="macro-panel"></div>
+        <div id="macro-body"></div>
+        <div id="macro-footer" class="macro-footer"></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="panel-shortcuts" class="panel">
+    <div id="shortcuts"></div>
+  </section>
+
+  <section id="panel-log" class="panel">
+    <pre id="log" class="log"></pre>
+  </section>
+</main>
+
+<section id="intro" class="intro">
+  <h1 data-i18n="intro.heading"></h1>
+  <p data-i18n="intro.lead"></p>
+  <p class="muted" data-i18n="intro.requirements"></p>
+  <p class="muted" data-i18n="intro.disclaimer"></p>
+</section>
+  </div>
+</div>
+</div>
+
+<dialog id="copy-dialog">
+  <form method="dialog">
+    <h3 data-i18n="copy.title"></h3>
+    <label><span data-i18n="copy.what"></span> <select id="copy-what"></select></label>
+    <label><span data-i18n="copy.from"></span> <select id="copy-from"></select></label>
+    <label><span data-i18n="copy.to"></span> <select id="copy-to"></select></label>
+    <p class="muted" data-i18n="copy.note"></p>
+    <menu>
+      <button value="cancel" data-i18n="common.cancel"></button>
+      <button value="ok" class="primary" data-i18n="common.ok"></button>
+    </menu>
+  </form>
+</dialog>
+
+<dialog id="restore-dialog">
+  <form method="dialog">
+    <h3 data-i18n="restore.title"></h3>
+    <label><span data-i18n="restore.pick"></span> <select id="restore-pick"></select></label>
+    <p id="restore-warning" class="muted"></p>
+    <menu>
+      <button value="cancel" data-i18n="common.cancel"></button>
+      <button value="ok" class="primary" data-i18n="common.ok"></button>
+    </menu>
+  </form>
+</dialog>
+
+<dialog id="confirm">
+  <form method="dialog">
+    <p id="confirm-message"></p>
+    <menu>
+      <button value="cancel" data-i18n="common.cancel"></button>
+      <button value="ok" class="primary" data-i18n="common.ok"></button>
+    </menu>
+  </form>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

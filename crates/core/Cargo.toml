@@ -1,0 +1,11 @@
+[package]
+name = "openhelity-core"
+description = "Protocol and memory banks of G-COME hall-effect keyboards such as the ZUOYA HE30"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"], optional = true }

@@ -1,0 +1,10 @@
+# Rust build output
+/target/
+
+# WebAssembly build of the core — produced by tools/build.sh
+/web/pkg/
+
+# Local scratch
+.DS_Store
+node_modules/
+*.log

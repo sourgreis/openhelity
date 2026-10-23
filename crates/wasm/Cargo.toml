@@ -1,0 +1,19 @@
+[package]
+name = "openhelity-wasm"
+description = "The keyboard protocol for the OpenHElity web configurator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+openhelity-core = { path = "../core", features = ["serde"] }
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+serde = { version = "1", features = ["derive"] }
+serde-wasm-bindgen = "0.6"

@@ -1,0 +1,15 @@
+name: Feature request
+description: An idea or another keyboard model
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Keyboard model and USB ID
+      description: For another model, e.g. "EPOMAKER GT60, 19F5:xxxx". Please do not attach vendor software or firmware files.

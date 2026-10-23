@@ -1,0 +1,28 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "files": {
+    "includes": [
+      "web/**/*.js",
+      "tests/**/*.mjs",
+      "tools/**/*.mjs",
+      "!web/pkg"
+    ]
+  },
+  "formatter": {
+    "enabled": false
+  },
+  "assist": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      }
+    }
+  }
+}
